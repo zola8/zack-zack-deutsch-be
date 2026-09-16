@@ -9,36 +9,58 @@ from core.config import settings
 from core.database import Base
 from core.database import engine
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=settings.PROJECT_NAME)
+def configure_middleware(app: FastAPI) -> None:
+    """Add all middleware to the FastAPI application."""
+    # Session middleware for OAuth state management
+    app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
-# Add Session Middleware (Required for Authlib OAuth flow to store state/nonce)
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(translate.router, prefix=settings.API_V1_STR)
+    # CORS middleware for frontend access
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to Zack Zack Deutsch Backend"}
+def register_routers(app: FastAPI) -> None:
+    """Register all API routers with the application."""
+    app.include_router(auth.router, prefix=settings.API_V1_STR)
+    app.include_router(translate.router, prefix=settings.API_V1_STR)
+
+
+def initialize_database() -> None:
+    """Create all database tables."""
+    Base.metadata.create_all(bind=engine)
+
+
+def create_app() -> FastAPI:
+    """Create and configure the FastAPI application."""
+    app = FastAPI(title=settings.PROJECT_NAME)
+
+    configure_middleware(app)
+    register_routers(app)
+
+    @app.get("/")
+    async def root():
+        return {"message": "Welcome to Zack Zack Deutsch Backend"}
+
+    return app
+
+
+def main() -> None:
+    """Run the application with uvicorn."""
+    initialize_database()
+    app = create_app()
+
+    print(f"http://{settings.HOST}:{settings.PORT}/docs")
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
 
 
 if __name__ == '__main__':
-    print("http://localhost:8080/docs")
-    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
+    main()
