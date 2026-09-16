@@ -1,28 +1,44 @@
-import logging
-
 import uvicorn
-from fastapi import APIRouter
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
-from core.logging_config import configure_logging
+from api.routers import auth
+from api.routers import translate
+from core.config import settings
+from core.database import Base
+from core.database import engine
 
-configure_logging()
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
-logger = logging.getLogger(__name__)
+app = FastAPI(title=settings.PROJECT_NAME)
 
-app = FastAPI()
-router = APIRouter(prefix="/test", tags=["Test"])
+# Add Session Middleware (Required for Authlib OAuth flow to store state/nonce)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(translate.router, prefix=settings.API_V1_STR)
 
 
-@router.get("/")
-async def homepage():
-    return {
-        "version": "0.1.0",
-    }
+@app.get("/")
+async def root():
+    return {"message": "Welcome to Zack Zack Deutsch Backend"}
 
-
-app.include_router(router)
 
 if __name__ == '__main__':
     print("http://localhost:8080/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)

@@ -13,5 +13,3 @@
 ```shell
 pip install -r requirements.txt
 ```
-
-## 2. How to run
