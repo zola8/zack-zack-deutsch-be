@@ -1,4 +1,3 @@
-import json
 import logging
 
 import uvicorn
@@ -13,6 +12,7 @@ from core.config import settings
 from core.database import Base
 from core.database import engine
 from core.logging_config import configure_logging
+from services.auth_service import configure_oauth
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title=settings.PROJECT_NAME)
 
     configure_middleware(app)
+    configure_oauth()
     register_routers(app)
 
     @app.get("/")
