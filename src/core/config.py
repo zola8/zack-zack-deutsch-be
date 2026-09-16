@@ -1,10 +1,22 @@
+import logging
 from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
+logger = logging.getLogger(__name__)
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 ENV_FILE_PATH = PROJECT_ROOT / ".env"
+
+
+def log_settings():
+    logger.info("Current Settings:")
+    for key, value in settings.model_dump().items():
+        # Mask secrets
+        if "SECRET" in key or "KEY" in key or "PASSWORD" in key:
+            value = value[:5] + "...(MASKED)..." + value[-5:]
+        logger.info(f"  {key}: {value}")
 
 
 class Settings(BaseSettings):
@@ -25,7 +37,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8080/api/v1/auth/google/callback"
-    FRONTEND_URL:str = "http://localhost:5173"
+    FRONTEND_URL: str = "http://localhost:5173"
 
     # External Services
     DEEPL_API_KEY: str = ""
@@ -36,5 +48,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-print(settings)

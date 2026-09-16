@@ -1,3 +1,6 @@
+import json
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,9 +8,15 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api.routers import auth
 from api.routers import translate
+from core.config import log_settings
 from core.config import settings
 from core.database import Base
 from core.database import engine
+from core.logging_config import configure_logging
+
+logger = logging.getLogger(__name__)
+
+configure_logging()
 
 
 def configure_middleware(app: FastAPI) -> None:
@@ -55,10 +64,11 @@ def create_app() -> FastAPI:
 
 def main() -> None:
     """Run the application with uvicorn."""
+    log_settings()
     initialize_database()
     app = create_app()
 
-    print(f"http://{settings.HOST}:{settings.PORT}/docs")
+    print(f"http://localhost:{settings.PORT}/docs")
     uvicorn.run(app, host=settings.HOST, port=settings.PORT)
 
 
