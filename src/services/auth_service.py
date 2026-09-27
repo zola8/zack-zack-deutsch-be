@@ -1,9 +1,13 @@
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+
 from authlib.integrations.starlette_client import OAuth
+from jose import jwt
 
 from api.schemas.user import UserCreate
 from core.config import settings
-from core.security import create_access_token
-from repositories.user_repository import UserRepository
+from persistence.repositories.user_repository import UserRepository
 
 oauth = OAuth()
 
@@ -17,6 +21,16 @@ def configure_oauth():
         client_secret=settings.GOOGLE_CLIENT_SECRET,
         client_kwargs={'scope': 'openid email profile'}
     )
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 class AuthService:

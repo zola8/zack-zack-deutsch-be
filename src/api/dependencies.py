@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from core.config import settings
 from core.database import get_db
-from repositories.user_repository import UserRepository
+from persistence.repositories.user_repository import UserRepository
 
 AUTH_COOKIE_NAME = "access_token"
 

@@ -13,8 +13,8 @@ from api.dependencies import get_current_user
 from api.schemas.user import UserResponse
 from core.config import settings
 from core.database import get_db
-from models.user import User
-from repositories.user_repository import UserRepository
+from persistence.models.dbuser import DBUser
+from persistence.repositories.user_repository import UserRepository
 from services.auth_service import AuthService
 from services.auth_service import oauth
 
@@ -52,6 +52,11 @@ def set_auth_cookie(response: RedirectResponse, token: str) -> None:
         samesite="none",
         path="/",
     )
+
+
+def db_user_to_response(db_user: DBUser) -> UserResponse:
+    """Converts a DBUser ORM object to a UserResponse Pydantic schema."""
+    return UserResponse.model_validate(db_user)
 
 
 # --- Routes ---
@@ -134,7 +139,8 @@ async def logout():
 
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: User = Depends(get_current_user)):
+async def read_users_me(current_user: DBUser = Depends(get_current_user)):
     """Returns current user profile using the UserResponse schema."""
-    logger.info("Fetching profile for user ID: %s", current_user.id)
-    return current_user
+    logger.debug("Fetching profile for user ID: %s", current_user.id)
+
+    return db_user_to_response(current_user)
