@@ -7,7 +7,8 @@ from fastapi import HTTPException
 from api.dependencies import get_translator_service
 from api.schemas.translation import TranslationRequest
 from api.schemas.translation import TranslationResponse
-from services.translator_service import TranslatorService
+from services.translator.factory import TranslatorFactory
+from services.translator.translator_service import TranslatorService
 
 logger = logging.getLogger(__name__)
 
@@ -36,5 +37,11 @@ async def translate_text(
         logger.error("Translation failed: %s", e, exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail="Translation service temporarily unavailable"
+            detail=e.args[0] if e.args else "Translation failed"
         )
+
+
+@router.get("/providers")
+async def get_providers():
+    """Returns a list of available translation providers."""
+    return TranslatorFactory.get_available_providers()
