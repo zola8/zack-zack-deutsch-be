@@ -53,10 +53,6 @@ def create_app() -> FastAPI:
     configure_oauth()
     register_routers(app)
 
-    @app.get("/")
-    async def root():
-        return {"message": "Welcome to Zack Zack Deutsch Backend"}
-
     return app
 
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from core.database import get_db
 from persistence.repositories.user_repository import UserRepository
+from services.translator_service import TranslatorService
 
 AUTH_COOKIE_NAME = "access_token"
 
@@ -67,3 +68,8 @@ async def get_current_user(
         )
 
     return user
+
+
+def get_translator_service() -> TranslatorService:
+    """Dependency provider for TranslatorService."""
+    return TranslatorService()
