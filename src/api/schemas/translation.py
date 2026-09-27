@@ -7,8 +7,8 @@ from pydantic import Field
 class TranslationRequest(BaseModel):
     """Request schema for translation endpoint."""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to translate")
-    source_lang: str = Field(default="DE", description="Source language code ('DE', 'EN')")
-    target_lang: str = Field(default="EN", description="Target language code ('EN', 'DE')")
+    source_lang: str = Field(default="EN", description="Source language code ('DE', 'EN')")
+    target_lang: str = Field(default="DE", description="Target language code ('EN', 'DE')")
     provider: str = Field(
         default="deepl",
         description="Translation provider to use (e.g., 'deepl', 'libre')"
@@ -26,3 +26,7 @@ class TranslationResponse(BaseModel):
     target_lang: str = Field(..., description="Target language code")
     char_count: int = Field(..., description="Number of characters in original text")
     provider: str = Field(..., description="Translation provider used")
+    metadata: dict[str, Any] | None = Field(
+        default=None,
+        description="Additional provider-specific data not covered by typed fields"
+    )
