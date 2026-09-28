@@ -75,7 +75,7 @@ async def auth_status(request: Request):
         return {"authenticated": False}
 
     try:
-        jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        jwt.decode(token, settings.AUTH_SECRET_KEY, algorithms=[settings.ALGORITHM])
     except JWTError:
         return {"authenticated": False}
 

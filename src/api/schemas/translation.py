@@ -10,8 +10,8 @@ class TranslationRequest(BaseModel):
     source_lang: str = Field(default="EN", description="Source language code ('DE', 'EN')")
     target_lang: str = Field(default="DE", description="Target language code ('EN', 'DE')")
     provider: str = Field(
-        default="deepl",
-        description="Translation provider to use (e.g., 'deepl', 'libre')"
+        default="azure",
+        description="Translation provider to use"
     )
     options: dict[str, Any] | None = Field(
         default=None,

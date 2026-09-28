@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./zz-deutsch.db"
 
     # Security
-    SECRET_KEY: str = "super-secret-key-change-in-production"
+    AUTH_SECRET_KEY: str = "super-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
 
@@ -43,6 +43,9 @@ class Settings(BaseSettings):
 
     # External Services
     DEEPL_API_KEY: str = ""
+    AZURE_TRANSLATOR_KEY: str = ""
+    AZURE_TRANSLATOR_ENDPOINT: str = "https://api.cognitive.microsofttranslator.com"
+    AZURE_TRANSLATOR_REGION: str = "westeurope"
 
     class Config:
         env_file = ENV_FILE_PATH

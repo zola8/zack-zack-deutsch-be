@@ -22,7 +22,7 @@ configure_logging()
 def configure_middleware(app: FastAPI) -> None:
     """Add all middleware to the FastAPI application."""
     # Session middleware for OAuth state management
-    app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+    app.add_middleware(SessionMiddleware, secret_key=settings.AUTH_SECRET_KEY)
 
     # CORS middleware for frontend access
     app.add_middleware(

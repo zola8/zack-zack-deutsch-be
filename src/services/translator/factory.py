@@ -1,8 +1,8 @@
 import logging
 
+from services.translator.azure_translator import AzureTranslator
 from services.translator.base import BaseTranslator
 from services.translator.deepl_translator import DeepLTranslator
-from services.translator.libre_translator import LibreTranslateTranslator
 
 logger = logging.getLogger(__name__)
 
@@ -12,19 +12,13 @@ class TranslatorFactory:
 
     _translators: dict[str, BaseTranslator] = {
         "deepl": DeepLTranslator(),
-        "libre": LibreTranslateTranslator(),
+        "azure": AzureTranslator(),
     }
 
     @classmethod
     def get_translator(cls, provider: str) -> BaseTranslator:
         """
         Get a translator instance by provider name.
-
-        Args:
-            provider: Provider name (e.g., 'deepl', 'libre')
-
-        Returns:
-            Translator instance
 
         Raises:
             ValueError: If provider is not supported
