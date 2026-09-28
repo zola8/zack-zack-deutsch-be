@@ -15,8 +15,8 @@ from core.config import settings
 from core.database import get_db
 from persistence.models.dbuser import DBUser
 from persistence.repositories.user_repository import UserRepository
-from services.auth_service import AuthService
-from services.auth_service import oauth
+from services.auth.auth_service import AuthService
+from services.auth.auth_service import oauth
 
 logger = logging.getLogger(__name__)
 

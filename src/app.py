@@ -13,7 +13,7 @@ from core.config import settings
 from core.database import Base
 from core.database import engine
 from core.logging_config import configure_logging
-from services.auth_service import configure_oauth
+from services.auth.auth_service import configure_oauth
 
 # ==========================================
 # Logging
