@@ -6,11 +6,12 @@ from core.config import settings
 
 engine = create_engine(
     settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    pool_pre_ping=True,
+    pool_size=5,  # Keep 5 connections open
+    max_overflow=10
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
 
 

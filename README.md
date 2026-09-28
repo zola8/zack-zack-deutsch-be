@@ -4,6 +4,11 @@
 
 ![Build and Test](https://github.com/zola8/zack-zack-deutsch-be/actions/workflows/build.yml/badge.svg)
 
+#### Prod URLs
+
+- https://zack-zack-deutsch-fe.vercel.app
+- https://zack-zack-deutsch-be.vercel.app/docs
+
 ## 1. Installation
 
 #### Prerequisites
@@ -33,7 +38,10 @@ pip install -r requirements.txt
 - FE: https://vercel.com/zola8s-projects/zack-zack-deutsch-fe
 - BE: https://vercel.com/zola8s-projects/zack-zack-deutsch-be
 
-#### Prod URLs
+#### Postgres
 
-- https://zack-zack-deutsch-fe.vercel.app/
-- https://zack-zack-deutsch-be.vercel.app/
+- Postgres console: https://console.aiven.io/account/a5e0f2593af3/project/zola8/services/zz-deutsch-postgres/overview
+
+    ```
+    postgres://<USER>:<PASSWORD>@zz-deutsch-postgres-zola8.h.aivencloud.com:25212/defaultdb?sslmode=require
+    ```

@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -46,13 +45,8 @@ print_settings()
 
 def initialize_database() -> None:
     """Create all database tables."""
-
-    # TODO SAFETY CHECK: Vercel's filesystem is read-only. If you are still using SQLite, this will crash on Vercel.
-    if os.getenv("VERCEL") == "1":
-        logger.info("Running on Vercel: Skipping automatic DB initialization.")
-    else:
-        logger.info("Initializing database locally...")
-        Base.metadata.create_all(bind=engine)
+    logger.info("Syncing database tables with PostgreSQL...")
+    Base.metadata.create_all(bind=engine)
 
 
 def configure_middleware(app: FastAPI) -> None:

@@ -12,3 +12,4 @@ email-validator>=2.3.0
 itsdangerous>=2.2.0
 python-json-logger>=4.1.0
 deepl>=1.32.0
+psycopg2-binary>=2.9.13
