@@ -2,6 +2,8 @@
 
 ![readme_stripe.svg](docs/images/readme_stripe.svg)
 
+![Build and Test](https://github.com/zola8/zack-zack-deutsch-be/actions/workflows/build.yml/badge.svg)
+
 ## 1. Installation
 
 #### Prerequisites
@@ -13,7 +15,6 @@
 ```shell
 pip install -r requirements.txt
 ```
-
 
 ## 2. Check your limits
 
@@ -29,5 +30,10 @@ pip install -r requirements.txt
 
 #### Vercel
 
-- FE url: https://zack-zack-deutsch-fe.vercel.app/
-- BE:
+- FE: https://vercel.com/zola8s-projects/zack-zack-deutsch-fe
+- BE: https://vercel.com/zola8s-projects/zack-zack-deutsch-be
+
+#### Prod URLs
+
+- https://zack-zack-deutsch-fe.vercel.app/
+- https://zack-zack-deutsch-be.vercel.app/
