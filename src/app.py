@@ -1,10 +1,28 @@
 import logging
 import os
+import sys
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+
+# ==========================================
+# VERCEL PATH FIX: Ensure both 'src/' and project root are in sys.path
+# ==========================================
+current_dir = Path(__file__).parent.resolve()  # This is the 'src' directory
+project_root = current_dir.parent.resolve()  # This is the project root
+
+print("Current Directory:", current_dir)
+print("Project Root:", project_root)
+
+
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 
 from api.routers import auth
 from api.routers import translate
