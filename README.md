@@ -26,3 +26,8 @@ pip install -r requirements.txt
 
 - web: https://portal.azure.com/#home
 - 2 million characters of any combination of standard translation and custom translation training free per month
+
+#### Vercel
+
+- FE url: https://zack-zack-deutsch-fe.vercel.app/
+- BE:
