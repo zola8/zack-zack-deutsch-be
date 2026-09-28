@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api.routers import auth
 from api.routers import translate
-from core.config import print_log_settings
+from core.config import print_settings
 from core.config import settings
 from core.database import Base
 from core.database import engine
@@ -21,7 +21,7 @@ from services.auth.auth_service import configure_oauth
 
 configure_logging()
 logger = logging.getLogger(__name__)
-print_log_settings()
+print_settings()
 
 
 # ==========================================

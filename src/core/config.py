@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE_PATH = PROJECT_ROOT / ".env"
 
 
-def print_log_settings():
+def print_settings():
     logger.info("Current Settings:")
     for key, value in settings.model_dump().items():
         # Mask secrets
