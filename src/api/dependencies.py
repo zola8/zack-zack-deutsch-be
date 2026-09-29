@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from core.database import get_db
 from persistence.repositories.user_repository import UserRepository
+from services.grammar_checker.grammar_checker import GrammarChecker
 from services.translator.translator_service import TranslatorService
 
 AUTH_COOKIE_NAME = "access_token"
@@ -73,3 +74,11 @@ async def get_current_user(
 def get_translator_service() -> TranslatorService:
     """Dependency provider for TranslatorService."""
     return TranslatorService()
+
+
+_grammar_checker = GrammarChecker("de-DE")
+
+
+def get_grammar_checker() -> GrammarChecker:
+    """Dependency provider for GrammarCheckerService."""
+    return _grammar_checker

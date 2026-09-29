@@ -1,5 +1,6 @@
 import logging
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -23,12 +24,14 @@ if str(project_root) not in sys.path:
 
 from api.routers import auth
 from api.routers import translate
+from api.routers import grammar
 from core.config import print_settings
 from core.config import settings
 from core.database import Base
 from core.database import engine
 from core.logging_config import configure_logging
 from services.auth.auth_service import configure_oauth
+from api.dependencies import _grammar_checker
 
 # ==========================================
 # Logging
@@ -73,11 +76,22 @@ def register_routers(app: FastAPI) -> None:
     """Register all API routers with the application."""
     app.include_router(auth.router, prefix=settings.API_V1_STR)
     app.include_router(translate.router, prefix=settings.API_V1_STR)
+    app.include_router(grammar.router, prefix=settings.API_V1_STR)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Application startup complete.")
+
+    yield
+
+    logger.info("Shutting down application, closing grammar checker client...")
+    await _grammar_checker.close()
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
-    app = FastAPI(title=settings.PROJECT_NAME)
+    app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
     configure_middleware(app)
     configure_oauth()

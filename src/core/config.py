@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     AZURE_TRANSLATOR_ENDPOINT: str = "https://api.cognitive.microsofttranslator.com"
     AZURE_TRANSLATOR_REGION: str = "westeurope"
 
+    LANGUAGETOOL_API_URL: str = "https://api.languagetoolplus.com/v2/check"
+
     class Config:
         env_file = ENV_FILE_PATH
         env_file_encoding = "utf-8"
