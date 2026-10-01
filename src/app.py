@@ -25,6 +25,7 @@ if str(project_root) not in sys.path:
 from api.routers import auth
 from api.routers import translate
 from api.routers import grammar
+from api.routers import dictionary
 from core.config import print_settings
 from core.config import settings
 from core.database import Base
@@ -77,6 +78,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(auth.router, prefix=settings.API_V1_STR)
     app.include_router(translate.router, prefix=settings.API_V1_STR)
     app.include_router(grammar.router, prefix=settings.API_V1_STR)
+    app.include_router(dictionary.router, prefix=settings.API_V1_STR)
 
 
 @asynccontextmanager
