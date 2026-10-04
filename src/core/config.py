@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     AZURE_TRANSLATOR_ENDPOINT: str = "https://api.cognitive.microsofttranslator.com"
     AZURE_TRANSLATOR_REGION: str = "westeurope"
 
+    TURSO_DATABASE_URL: str = "libsql://dictionary-zola8.aws-eu-west-1.turso.io"
+    TURSO_API_KEY: str = ""
+
     LANGUAGETOOL_API_URL: str = "https://api.languagetoolplus.com/v2/check"
 
     class Config:

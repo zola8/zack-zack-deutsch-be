@@ -1,4 +1,2 @@
 *.db binary
 *.sqlite binary
-*.sqlite3 binary
-src/data/** binary

@@ -62,13 +62,6 @@ class ExactMatchResponse(BaseModel):
     translations: list[DictionaryEntryResponse]
 
 
-class ByTypeResponse(BaseModel):
-    word_type: str
-    search_type: str
-    count: int
-    results: list[DictionaryEntryResponse]
-
-
 class LanguagePairStats(BaseModel):
     lang_from: str
     lang_to: str

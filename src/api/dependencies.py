@@ -1,7 +1,6 @@
 import logging
-import os
-from pathlib import Path
 
+import turso_serverless
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import Request
@@ -15,7 +14,7 @@ from core.config import settings
 from core.database import get_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
-from services.dictionary_service import DictionaryService
+from services.dictionary.dictionary_service import DictionaryService
 from services.grammar_checker.grammar_checker import GrammarChecker
 from services.translator.translator_service import TranslatorService
 
@@ -24,8 +23,11 @@ logger = logging.getLogger(__name__)
 AUTH_COOKIE_NAME = "access_token"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-SRC_DIR = Path(__file__).parent.parent
-DICTIONARY_DB_PATH = SRC_DIR / "data" / "dictionary.db"
+logger.info("Initializing global Turso connection...")
+turso_client = turso_serverless.connect(
+    settings.TURSO_DATABASE_URL,
+    auth_token=settings.TURSO_API_KEY,
+)
 
 
 async def get_current_user(
@@ -95,21 +97,8 @@ def get_grammar_checker() -> GrammarChecker:
 
 
 def get_dictionary_repo() -> DictionaryRepository:
-    logger.info("Dictionary DB path: %s", DICTIONARY_DB_PATH)
-    logger.info("Dictionary DB exists: %s", DICTIONARY_DB_PATH.exists())
-    logger.info("Dictionary DB size: %d bytes", DICTIONARY_DB_PATH.stat().st_size)
-    logger.info("Vercel environment: %d", os.getenv("VERCEL"))
-
-    if not DICTIONARY_DB_PATH.exists():
-        logger.error("Dictionary database not found at: %s", DICTIONARY_DB_PATH)
-        raise FileNotFoundError(f"Dictionary database not found at: {DICTIONARY_DB_PATH}")
-
-    with open(DICTIONARY_DB_PATH, "rb") as f:
-        header = f.read(16)
-        logger.info("DB header (hex): %s", header.hex())
-        logger.info("DB header (raw): %s", header)
-
-    return DictionaryRepository(str(DICTIONARY_DB_PATH))
+    """Pass the global, already-open client to the repository."""
+    return DictionaryRepository(turso_client)
 
 
 def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_repo)) -> DictionaryService:

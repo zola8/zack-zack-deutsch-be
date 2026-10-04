@@ -1,6 +1,5 @@
 import logging
 
-from api.schemas.dictionary import ByTypeResponse
 from api.schemas.dictionary import ContainsResponse
 from api.schemas.dictionary import DictionaryEntryResponse
 from api.schemas.dictionary import DictionarySearchRequest
@@ -45,7 +44,7 @@ class DictionaryService:
         )
 
     def search_full_text(self, request: DictionarySearchRequest) -> SearchResponse:
-        """Perform full-text search using FTS5."""
+        """Perform full-text search."""
         logger.debug(
             "Searching dictionary: query=%s, lang=%s->%s",
             request.query, request.lang_from, request.lang_to
@@ -119,35 +118,6 @@ class DictionaryService:
             search_text=text,
             search_field=field,
             search_type="contains",
-            count=len(results),
-            results=[self._to_entry_response(r) for r in results]
-        )
-
-    def search_by_type(
-        self,
-        word_type: str,
-        lang_from: str,
-        lang_to: str,
-        limit: int
-    ) -> ByTypeResponse:
-        """Get all entries of a specific word type."""
-        logger.debug(
-            "Searching by type: type=%s, lang=%s->%s",
-            word_type, lang_from, lang_to
-        )
-
-        results = self.repo.search_by_type(
-            word_type=word_type,
-            lang_from=lang_from,
-            lang_to=lang_to,
-            limit=limit
-        )
-
-        logger.debug("By-type search completed: found %d results", len(results))
-
-        return ByTypeResponse(
-            word_type=word_type,
-            search_type="by_type",
             count=len(results),
             results=[self._to_entry_response(r) for r in results]
         )

@@ -6,14 +6,13 @@ from fastapi import HTTPException
 from fastapi import Query
 
 from api.dependencies import get_dictionary_service
-from api.schemas.dictionary import ByTypeResponse
 from api.schemas.dictionary import ContainsResponse
 from api.schemas.dictionary import DictionaryContainsRequest
 from api.schemas.dictionary import DictionarySearchRequest
 from api.schemas.dictionary import ExactMatchResponse
 from api.schemas.dictionary import SearchResponse
 from api.schemas.dictionary import StatsResponse
-from services.dictionary_service import DictionaryService
+from services.dictionary.dictionary_service import DictionaryService
 
 logger = logging.getLogger(__name__)
 
@@ -76,25 +75,6 @@ async def search_contains(
         raise HTTPException(
             status_code=500,
             detail=e.args[0] if e.args else "Contains search failed"
-        )
-
-
-@router.get("/by-type/{word_type}", response_model=ByTypeResponse)
-async def search_by_type(
-    word_type: str,
-    lang_from: str = Query(default="en"),
-    lang_to: str = Query(default="de"),
-    limit: int = Query(default=50, ge=1, le=200),
-    service: DictionaryService = Depends(get_dictionary_service)
-):
-    """Get all entries of a specific word type."""
-    try:
-        return service.search_by_type(word_type, lang_from, lang_to, limit)
-    except Exception as e:
-        logger.error("By-type search failed: %s", e, exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=e.args[0] if e.args else "By-type search failed"
         )
 
 
