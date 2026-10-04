@@ -1,3 +1,5 @@
+import logging
+import os
 from pathlib import Path
 
 from fastapi import Depends
@@ -17,13 +19,17 @@ from services.dictionary_service import DictionaryService
 from services.grammar_checker.grammar_checker import GrammarChecker
 from services.translator.translator_service import TranslatorService
 
-AUTH_COOKIE_NAME = "access_token"
+logger = logging.getLogger(__name__)
 
+AUTH_COOKIE_NAME = "access_token"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 SRC_DIR = Path(__file__).parent.parent
-
 DICTIONARY_DB_PATH = SRC_DIR / "data" / "dictionary.db"
+
+logger.info("Dictionary DB path: %s", DICTIONARY_DB_PATH)
+logger.info("Dictionary DB exists: %s", DICTIONARY_DB_PATH.exists())
+logger.debug("Vercel environment: %s", os.getenv("VERCEL"))
 
 
 async def get_current_user(
@@ -93,6 +99,9 @@ def get_grammar_checker() -> GrammarChecker:
 
 
 def get_dictionary_repo() -> DictionaryRepository:
+    if not DICTIONARY_DB_PATH.exists():
+        logger.error("Dictionary database not found at: %s", DICTIONARY_DB_PATH)
+        raise FileNotFoundError(f"Dictionary database not found at: {DICTIONARY_DB_PATH}")
     return DictionaryRepository(str(DICTIONARY_DB_PATH))
 
 
