@@ -13,6 +13,7 @@ from core.config import settings
 from core.database import get_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
+from services.dictionary_service import DictionaryService
 from services.grammar_checker.grammar_checker import GrammarChecker
 from services.translator.translator_service import TranslatorService
 
@@ -93,3 +94,8 @@ def get_grammar_checker() -> GrammarChecker:
 
 def get_dictionary_repo() -> DictionaryRepository:
     return DictionaryRepository(str(DICTIONARY_DB_PATH))
+
+
+def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_repo)) -> DictionaryService:
+    """Dependency provider for DictionaryService."""
+    return DictionaryService(repo)
