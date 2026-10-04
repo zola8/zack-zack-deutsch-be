@@ -27,10 +27,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 SRC_DIR = Path(__file__).parent.parent
 DICTIONARY_DB_PATH = SRC_DIR / "data" / "dictionary.db"
 
-logger.info("Dictionary DB path: %s", DICTIONARY_DB_PATH)
-logger.info("Dictionary DB exists: %s", DICTIONARY_DB_PATH.exists())
-logger.debug("Vercel environment: %s", os.getenv("VERCEL"))
-
 
 async def get_current_user(
     request: Request,
@@ -99,9 +95,20 @@ def get_grammar_checker() -> GrammarChecker:
 
 
 def get_dictionary_repo() -> DictionaryRepository:
+    logger.info("Dictionary DB path: %s", DICTIONARY_DB_PATH)
+    logger.info("Dictionary DB exists: %s", DICTIONARY_DB_PATH.exists())
+    logger.info("Dictionary DB size: %d bytes", DICTIONARY_DB_PATH.stat().st_size)
+    logger.info("Vercel environment: %d", os.getenv("VERCEL"))
+
     if not DICTIONARY_DB_PATH.exists():
         logger.error("Dictionary database not found at: %s", DICTIONARY_DB_PATH)
         raise FileNotFoundError(f"Dictionary database not found at: {DICTIONARY_DB_PATH}")
+
+    with open(DICTIONARY_DB_PATH, "rb") as f:
+        header = f.read(16)
+        logger.info("DB header (hex): %s", header.hex())
+        logger.info("DB header (raw): %s", header)
+
     return DictionaryRepository(str(DICTIONARY_DB_PATH))
 
 
