@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import Request
 from fastapi.responses import RedirectResponse
+from fastapi.responses import Response
 from jose import JWTError
 from jose import jwt
 
@@ -65,6 +66,7 @@ async def auth_status(request: Request):
         if auth_header.lower().startswith("bearer "):
             token = auth_header[7:].strip() or None
 
+    # TODO add user?
     if not token:
         return {"authenticated": False}
 
@@ -128,10 +130,14 @@ async def google_callback(
 
 
 @router.get("/logout")
-async def logout():
-    response = frontend_redirect("/login")
-    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
-    return response
+async def logout(response: Response):
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        path="/",
+        samesite="none",
+        secure=True,
+    )
+    return {"message": "Logged out"}
 
 
 @router.get("/me", response_model=UserResponse)
