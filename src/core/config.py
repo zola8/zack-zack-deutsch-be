@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Google OAuth
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8080/api/v1/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str = "https://zack-zack-deutsch-be.vercel.app/api/v1/auth/google/callback"
 
     FRONTEND_URL: str = "http://localhost:5173"
     FRONTEND_CALLBACK_PATH: str = "/login/callback"

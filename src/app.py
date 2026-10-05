@@ -1,7 +1,14 @@
-import logging
-import sys
-from contextlib import asynccontextmanager
 from pathlib import Path
+
+# ==========================================
+# VERCEL PATH FIX
+# ==========================================
+current_dir = Path(__file__).parent.resolve()  # This is the 'src' directory
+project_root = current_dir.parent.resolve()  # This is the project root
+
+import sys
+import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
@@ -9,12 +16,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from api.dependencies import close_turso_connections
-
-# ==========================================
-# VERCEL PATH FIX: Ensure both 'src/' and project root are in sys.path
-# ==========================================
-current_dir = Path(__file__).parent.resolve()  # This is the 'src' directory
-project_root = current_dir.parent.resolve()  # This is the project root
 
 print("Current Directory:", current_dir)
 print("Project Root:", project_root)
