@@ -38,12 +38,6 @@ pip install -r requirements.txt
 - FE: https://vercel.com/zola8s-projects/zack-zack-deutsch-fe
 - BE: https://vercel.com/zola8s-projects/zack-zack-deutsch-be
 
-#### Database
+#### Databases
 
-- Postgres console: https://console.aiven.io/account/a5e0f2593af3/project/zola8/services/zz-deutsch-postgres/overview
-
-    ```
-    postgres://<USER>:<PASSWORD>@zz-deutsch-postgres-zola8.h.aivencloud.com:25212/defaultdb?sslmode=require
-    ```
-
-- Turso console: https://app.turso.tech/zola8/databases/dictionary
+- Turso console: https://app.turso.tech/zola8

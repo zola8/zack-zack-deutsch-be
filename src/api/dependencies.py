@@ -8,10 +8,8 @@ from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from jose import jwt
-from sqlalchemy.orm import Session
 
 from core.config import settings
-from core.database import get_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
 from services.dictionary.dictionary_service import DictionaryService
@@ -23,17 +21,39 @@ logger = logging.getLogger(__name__)
 AUTH_COOKIE_NAME = "access_token"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
-logger.info("Initializing global Turso connection...")
-turso_client = turso_serverless.connect(
-    settings.TURSO_DATABASE_URL,
-    auth_token=settings.TURSO_API_KEY,
+# ==========================================
+# GLOBAL TURSO CONNECTIONS
+# ==========================================
+logger.info("Initializing global Turso connections...")
+
+_turso_dictionary_client = turso_serverless.connect(
+    settings.TURSO_DICTIONARY_URL,
+    auth_token=settings.TURSO_DICTIONARY_API_KEY,
+)
+
+_turso_globaldb_client = turso_serverless.connect(
+    settings.TURSO_GLOBAL_DB_URL,
+    auth_token=settings.TURSO_GLOBAL_DB_API_KEY,
 )
 
 
+def close_turso_connections():
+    """Explicitly close global Turso database connections."""
+    logger.info("Closing Turso database connections...")
+    try:
+        _turso_dictionary_client.close()
+        _turso_globaldb_client.close()
+        logger.info("Turso connections closed successfully.")
+    except Exception as e:
+        logger.error("Error closing Turso connections: %s", e)
+
+
+# ==========================================
+# USER DEPENDENCIES (Now using Turso Global DB)
+# ==========================================
 async def get_current_user(
     request: Request,
     token_from_header: str | None = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
 ):
     # 1. Try to get token from the Authorization header first
     token = token_from_header
@@ -49,12 +69,18 @@ async def get_current_user(
             detail="Not authenticated",
         )
 
-    # 4
-    payload = jwt.decode(
-        token,
-        settings.AUTH_SECRET_KEY,
-        algorithms=[settings.ALGORITHM],
-    )
+    # 4. Decode and validate token
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,  # Ensure this matches your auth_service config
+            algorithms=[settings.ALGORITHM],
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
 
     sub = payload.get("sub")
     if sub is None:
@@ -65,14 +91,15 @@ async def get_current_user(
 
     try:
         user_id = int(sub)
-    except (TypeError, ValueError, JWTError):
+    except (TypeError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
         )
 
-    # 5. Fetch user from DB by ID
-    user = UserRepository(db).get_user_by_id(user_id)
+    # TODO
+    user_repo = get_user_repo()
+    user = user_repo.get_user_by_id(user_id)
 
     if not user:
         raise HTTPException(
@@ -83,6 +110,9 @@ async def get_current_user(
     return user
 
 
+# ==========================================
+# OTHER SERVICES
+# ==========================================
 def get_translator_service() -> TranslatorService:
     """Dependency provider for TranslatorService."""
     return TranslatorService()
@@ -97,10 +127,13 @@ def get_grammar_checker() -> GrammarChecker:
 
 
 def get_dictionary_repo() -> DictionaryRepository:
-    """Pass the global, already-open client to the repository."""
-    return DictionaryRepository(turso_client)
+    return DictionaryRepository(_turso_dictionary_client)
 
 
 def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_repo)) -> DictionaryService:
     """Dependency provider for DictionaryService."""
     return DictionaryService(repo)
+
+
+def get_user_repo() -> UserRepository:
+    return UserRepository(_turso_globaldb_client)

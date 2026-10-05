@@ -1,30 +1,57 @@
-from sqlalchemy.orm import Session
-
 from api.schemas.user import UserCreate
-from persistence.models.dbuser import DBUser
+from persistence.models.user import User
 
 
 class UserRepository:
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, conn):
+        """Initialize with an active turso_serverless connection object."""
+        self.conn = conn
 
-    def get_user_by_id(self, user_id: int) -> DBUser | None:
-        return self.db.query(DBUser).filter(DBUser.id == user_id).first()
+    def get_user_by_id(self, user_id: int) -> User | None:
+        cursor = self.conn.execute(
+            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE id = ?",
+            [user_id]
+        )
+        row = cursor.fetchone()
+        return self._row_to_user(row)
 
     def get_user_by_email(self, email: str):
-        return self.db.query(DBUser).filter(DBUser.email == email).first()
+        cursor = self.conn.execute(
+            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE email = ?",
+            [email]
+        )
+        row = cursor.fetchone()
+        return self._row_to_user(row)
 
     def get_user_by_google_id(self, google_id: str):
-        return self.db.query(DBUser).filter(DBUser.google_id == google_id).first()
+        cursor = self.conn.execute(
+            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE google_id = ?",
+            [google_id]
+        )
+        row = cursor.fetchone()
+        return self._row_to_user(row)
 
     def create_user(self, user_in: UserCreate):
-        db_user = DBUser(
-            email=user_in.email,
-            full_name=user_in.full_name,
-            google_id=user_in.google_id,
-            picture_url=user_in.picture_url
+        cursor = self.conn.execute("""
+            INSERT INTO users (email, full_name, google_id, picture_url)
+            VALUES (?, ?, ?, ?)
+            RETURNING id, email, full_name, google_id, picture_url, created_at, updated_at
+        """, [user_in.email, user_in.full_name, user_in.google_id, user_in.picture_url])
+
+        row = cursor.fetchone()
+        self.conn.commit()
+        return self._row_to_user(row)
+
+    def _row_to_user(self, row) -> User | None:
+        """Convert a Turso row tuple to a User dataclass."""
+        if not row:
+            return None
+        return User(
+            id=row[0],
+            email=row[1],
+            full_name=row[2],
+            google_id=row[3],
+            picture_url=row[4],
+            created_at=row[5],
+            updated_at=row[6]
         )
-        self.db.add(db_user)
-        self.db.commit()
-        self.db.refresh(db_user)
-        return db_user

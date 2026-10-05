@@ -7,13 +7,11 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from jose import JWTError
 from jose import jwt
-from sqlalchemy.orm import Session
 
 from api.dependencies import get_current_user
+from api.dependencies import get_user_repo
 from api.schemas.user import UserResponse
 from core.config import settings
-from core.database import get_db
-from persistence.models.dbuser import DBUser
 from persistence.repositories.user_repository import UserRepository
 from services.auth.auth_service import AuthService
 from services.auth.auth_service import oauth
@@ -54,11 +52,6 @@ def set_auth_cookie(response: RedirectResponse, token: str) -> None:
     )
 
 
-def db_user_to_response(db_user: DBUser) -> UserResponse:
-    """Converts a DBUser ORM object to a UserResponse Pydantic schema."""
-    return UserResponse.model_validate(db_user)
-
-
 # --- Routes ---
 
 @router.get("/status", response_model=dict)
@@ -90,7 +83,10 @@ async def google_login(request: Request):
 
 
 @router.get("/google/callback")
-async def google_callback(request: Request, db: Session = Depends(get_db)):
+async def google_callback(
+    request: Request,
+    user_repo: UserRepository = Depends(get_user_repo)
+):
     logger.info("Received Google OAuth callback")
 
     # 1. Handle Google consent screen errors
@@ -118,7 +114,6 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     # 4. Create or fetch user and generate app JWT
     try:
-        user_repo = UserRepository(db)
         auth_service = AuthService(user_repo)
         access_token = await auth_service.authenticate_or_create_user(userinfo)
     except Exception as e:
@@ -139,8 +134,8 @@ async def logout():
 
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: DBUser = Depends(get_current_user)):
+async def read_users_me(current_user: dict = Depends(get_current_user)):
     """Returns current user profile using the UserResponse schema."""
-    logger.debug("Fetching profile for user ID: %s", current_user.id)
+    logger.debug("Fetching profile for user ID: %s", current_user.get("id"))
 
-    return db_user_to_response(current_user)
+    return current_user

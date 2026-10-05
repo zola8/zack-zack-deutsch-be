@@ -26,7 +26,11 @@ class Settings(BaseSettings):
     PORT: int = 8080
 
     # Database
-    DATABASE_URL: str = "sqlite:///./zz-deutsch.db"
+    # DATABASE_URL: str = "sqlite:///./zz-deutsch.db"
+    TURSO_DICTIONARY_URL: str = "libsql://dictionary-zola8.aws-eu-west-1.turso.io"
+    TURSO_DICTIONARY_API_KEY: str = ""
+    TURSO_GLOBAL_DB_URL: str = "libsql://zz-deutsch-zola8.aws-eu-west-1.turso.io"
+    TURSO_GLOBAL_DB_API_KEY: str = ""
 
     # Security
     AUTH_SECRET_KEY: str = "super-secret-key-change-in-production"
@@ -46,9 +50,6 @@ class Settings(BaseSettings):
     AZURE_TRANSLATOR_KEY: str = ""
     AZURE_TRANSLATOR_ENDPOINT: str = "https://api.cognitive.microsofttranslator.com"
     AZURE_TRANSLATOR_REGION: str = "westeurope"
-
-    TURSO_DATABASE_URL: str = "libsql://dictionary-zola8.aws-eu-west-1.turso.io"
-    TURSO_API_KEY: str = ""
 
     LANGUAGETOOL_API_URL: str = "https://api.languagetoolplus.com/v2/check"
 

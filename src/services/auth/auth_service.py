@@ -54,4 +54,4 @@ class AuthService:
             )
             db_user = self.user_repo.create_user(user_in)
 
-        return create_access_token(data={"sub": str(db_user.id)})
+        return create_access_token(data={"sub": str(db_user["id"])})

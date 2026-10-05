@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
+from api.dependencies import close_turso_connections
+
 # ==========================================
 # VERCEL PATH FIX: Ensure both 'src/' and project root are in sys.path
 # ==========================================
@@ -28,8 +30,6 @@ from api.routers import grammar
 from api.routers import dictionary
 from core.config import print_settings
 from core.config import settings
-from core.database import Base
-from core.database import engine
 from core.logging_config import configure_logging
 from services.auth.auth_service import configure_oauth
 from api.dependencies import _grammar_checker
@@ -46,11 +46,6 @@ print_settings()
 # ==========================================
 # Application setup
 # ==========================================
-
-def initialize_database() -> None:
-    """Create all database tables."""
-    logger.info("Syncing database tables with PostgreSQL...")
-    Base.metadata.create_all(bind=engine)
 
 
 def configure_middleware(app: FastAPI) -> None:
@@ -88,7 +83,9 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("Shutting down application, closing grammar checker client...")
+    close_turso_connections()
     await _grammar_checker.close()
+    logger.info("Application shutdown complete.")
 
 
 def create_app() -> FastAPI:
@@ -105,9 +102,6 @@ def create_app() -> FastAPI:
 # ==========================================
 # 2. MODULE-LEVEL EXECUTION (Required for Vercel)
 # ==========================================
-
-# Initialize DB (conditionally)
-initialize_database()
 
 # Vercel looks for this exact variable name: "app"
 app = create_app()
