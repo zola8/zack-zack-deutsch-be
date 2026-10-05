@@ -12,6 +12,7 @@ from api.dependencies import get_current_user
 from api.dependencies import get_user_repo
 from api.schemas.user import UserResponse
 from core.config import settings
+from persistence.models.user import User
 from persistence.repositories.user_repository import UserRepository
 from services.auth.auth_service import AuthService
 from services.auth.auth_service import oauth
@@ -46,7 +47,7 @@ def set_auth_cookie(response: RedirectResponse, token: str) -> None:
         value=token,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         httponly=True,
-        secure=True,  # Required for samesite="none"
+        secure=True,
         samesite="none",
         path="/",
     )
@@ -134,8 +135,7 @@ async def logout():
 
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: dict = Depends(get_current_user)):
+async def read_users_me(current_user: User = Depends(get_current_user)):
     """Returns current user profile using the UserResponse schema."""
-    logger.debug("Fetching profile for user ID: %s", current_user.get("id"))
-
+    logger.debug("Fetching profile for user ID: %s", current_user.id)
     return current_user

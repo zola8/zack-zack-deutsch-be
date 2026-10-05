@@ -7,8 +7,10 @@ from pydantic import EmailStr
 
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: Optional[str] = None
-    picture_url: Optional[str] = None
+    name: Optional[str] = None
+    given_name: Optional[str] = None
+    family_name: Optional[str] = None
+    picture: Optional[str] = None
 
 
 class UserCreate(UserBase):

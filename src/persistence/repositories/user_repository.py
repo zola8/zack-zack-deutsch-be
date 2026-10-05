@@ -9,35 +9,38 @@ class UserRepository:
 
     def get_user_by_id(self, user_id: int) -> User | None:
         cursor = self.conn.execute(
-            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE id = ?",
+            "SELECT id, email, google_id, name, given_name, family_name, picture, created_at, updated_at FROM users WHERE id = ?",
             [user_id]
         )
-        row = cursor.fetchone()
-        return self._row_to_user(row)
+        return self._row_to_user(cursor.fetchone())
 
-    def get_user_by_email(self, email: str):
+    def get_user_by_email(self, email: str) -> User | None:
         cursor = self.conn.execute(
-            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE email = ?",
+            "SELECT id, email, google_id, name, given_name, family_name, picture, created_at, updated_at FROM users WHERE email = ?",
             [email]
         )
-        row = cursor.fetchone()
-        return self._row_to_user(row)
+        return self._row_to_user(cursor.fetchone())
 
-    def get_user_by_google_id(self, google_id: str):
+    def get_user_by_google_id(self, google_id: str) -> User | None:
         cursor = self.conn.execute(
-            "SELECT id, email, full_name, google_id, picture_url, created_at, updated_at FROM users WHERE google_id = ?",
+            "SELECT id, email, google_id, name, given_name, family_name, picture, created_at, updated_at FROM users WHERE google_id = ?",
             [google_id]
         )
-        row = cursor.fetchone()
-        return self._row_to_user(row)
+        return self._row_to_user(cursor.fetchone())
 
-    def create_user(self, user_in: UserCreate):
+    def create_user(self, user_in: UserCreate) -> User:
         cursor = self.conn.execute("""
-            INSERT INTO users (email, full_name, google_id, picture_url)
-            VALUES (?, ?, ?, ?)
-            RETURNING id, email, full_name, google_id, picture_url, created_at, updated_at
-        """, [user_in.email, user_in.full_name, user_in.google_id, user_in.picture_url])
-
+            INSERT INTO users (email, google_id, name, given_name, family_name, picture)
+            VALUES (?, ?, ?, ?, ?, ?)
+            RETURNING id, email, google_id, name, given_name, family_name, picture, created_at, updated_at
+        """, [
+            user_in.email,
+            user_in.google_id,
+            user_in.name,
+            user_in.given_name,
+            user_in.family_name,
+            user_in.picture
+        ])
         row = cursor.fetchone()
         self.conn.commit()
         return self._row_to_user(row)
@@ -49,9 +52,11 @@ class UserRepository:
         return User(
             id=row[0],
             email=row[1],
-            full_name=row[2],
-            google_id=row[3],
-            picture_url=row[4],
-            created_at=row[5],
-            updated_at=row[6]
+            google_id=row[2],
+            name=row[3],
+            given_name=row[4],
+            family_name=row[5],
+            picture=row[6],
+            created_at=row[7],
+            updated_at=row[8]
         )

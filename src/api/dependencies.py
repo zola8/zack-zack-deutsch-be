@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from jose import jwt
 
+from api.schemas.user import UserResponse
 from core.config import settings
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
@@ -24,13 +25,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 # ==========================================
 # GLOBAL TURSO CONNECTIONS
 # ==========================================
+
 logger.info("Initializing global Turso connections...")
 
 _turso_dictionary_client = turso_serverless.connect(
     settings.TURSO_DICTIONARY_URL,
     auth_token=settings.TURSO_DICTIONARY_API_KEY,
 )
-
 _turso_globaldb_client = turso_serverless.connect(
     settings.TURSO_GLOBAL_DB_URL,
     auth_token=settings.TURSO_GLOBAL_DB_API_KEY,
@@ -49,12 +50,39 @@ def close_turso_connections():
 
 
 # ==========================================
-# USER DEPENDENCIES (Now using Turso Global DB)
+# OTHER SERVICES
+# ==========================================
+def get_translator_service() -> TranslatorService:
+    return TranslatorService()
+
+
+_grammar_checker = GrammarChecker("de-DE")
+
+
+def get_grammar_checker() -> GrammarChecker:
+    return _grammar_checker
+
+
+def get_dictionary_repo() -> DictionaryRepository:
+    return DictionaryRepository(_turso_dictionary_client)
+
+
+def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_repo)) -> DictionaryService:
+    return DictionaryService(repo)
+
+
+def get_user_repo() -> UserRepository:
+    return UserRepository(_turso_globaldb_client)
+
+
+# ==========================================
+# USER DEPENDENCIES
 # ==========================================
 async def get_current_user(
     request: Request,
+    user_repo: UserRepository = Depends(get_user_repo),
     token_from_header: str | None = Depends(oauth2_scheme),
-):
+) -> UserResponse:
     # 1. Try to get token from the Authorization header first
     token = token_from_header
 
@@ -73,7 +101,7 @@ async def get_current_user(
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,  # Ensure this matches your auth_service config
+            settings.AUTH_SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
     except JWTError:
@@ -81,14 +109,12 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
         )
-
     sub = payload.get("sub")
     if sub is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
         )
-
     try:
         user_id = int(sub)
     except (TypeError, ValueError):
@@ -97,43 +123,13 @@ async def get_current_user(
             detail="Invalid token payload",
         )
 
-    # TODO
-    user_repo = get_user_repo()
+    # Fetch from DB
     user = user_repo.get_user_by_id(user_id)
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
 
-    return user
-
-
-# ==========================================
-# OTHER SERVICES
-# ==========================================
-def get_translator_service() -> TranslatorService:
-    """Dependency provider for TranslatorService."""
-    return TranslatorService()
-
-
-_grammar_checker = GrammarChecker("de-DE")
-
-
-def get_grammar_checker() -> GrammarChecker:
-    """Dependency provider for GrammarCheckerService."""
-    return _grammar_checker
-
-
-def get_dictionary_repo() -> DictionaryRepository:
-    return DictionaryRepository(_turso_dictionary_client)
-
-
-def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_repo)) -> DictionaryService:
-    """Dependency provider for DictionaryService."""
-    return DictionaryService(repo)
-
-
-def get_user_repo() -> UserRepository:
-    return UserRepository(_turso_globaldb_client)
+    # Convert DB entity to Pydantic schema
+    return UserResponse.model_validate(user)

@@ -40,7 +40,10 @@ class AuthService:
     async def authenticate_or_create_user(self, user_info: dict):
         google_id = user_info.get('sub')
         email = user_info.get('email')
+
         name = user_info.get('name')
+        given_name = user_info.get('given_name')
+        family_name = user_info.get('family_name')
         picture = user_info.get('picture')
 
         db_user = self.user_repo.get_user_by_google_id(google_id)
@@ -49,9 +52,13 @@ class AuthService:
 
         if not db_user:
             user_in = UserCreate(
-                email=email, full_name=name,
-                google_id=google_id, picture_url=picture
+                email=email,
+                google_id=google_id,
+                name=name,
+                given_name=given_name,
+                family_name=family_name,
+                picture=picture
             )
             db_user = self.user_repo.create_user(user_in)
 
-        return create_access_token(data={"sub": str(db_user["id"])})
+        return create_access_token(data={"sub": str(db_user.id)})
