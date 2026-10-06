@@ -12,7 +12,7 @@ from api.schemas.dictionary import DictionarySearchRequest
 from api.schemas.dictionary import ExactMatchResponse
 from api.schemas.dictionary import SearchResponse
 from api.schemas.dictionary import StatsResponse
-from services.dictionary.dictionary_service import DictionaryService
+from services.dictionary_service import DictionaryService
 
 logger = logging.getLogger(__name__)
 

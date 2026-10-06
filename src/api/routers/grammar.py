@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from api.dependencies import get_grammar_checker
 from api.schemas.grammar import GrammarCheckRequest
 from api.schemas.grammar import GrammarCheckResponse
-from services.grammar_checker.grammar_checker import GrammarChecker
+from services.grammar_checker_service import GrammarChecker
 
 logger = logging.getLogger(__name__)
 

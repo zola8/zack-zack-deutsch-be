@@ -15,8 +15,8 @@ from core.config import settings
 from core.database import get_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
-from services.dictionary.dictionary_service import DictionaryService
-from services.grammar_checker.grammar_checker import GrammarChecker
+from services.dictionary_service import DictionaryService
+from services.grammar_checker_service import GrammarChecker
 from services.translator.translator_service import TranslatorService
 from services.user_service import UserService
 

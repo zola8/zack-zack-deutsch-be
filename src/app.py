@@ -34,7 +34,7 @@ from core.logging_config import configure_logging
 from core.database import Base
 from core.database import engine
 from persistence.models.dbuser import DBUser  # noqa: F401
-from services.auth.auth_service import configure_oauth
+from services.auth_service import configure_oauth
 from api.dependencies import _grammar_checker
 
 # ==========================================

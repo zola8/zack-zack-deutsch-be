@@ -13,8 +13,8 @@ from api.dependencies import get_current_user
 from api.dependencies import get_user_service
 from api.schemas.user import UserResponse
 from core.config import settings
-from services.auth.auth_service import AuthService
-from services.auth.auth_service import oauth
+from services.auth_service import AuthService
+from services.auth_service import oauth
 from services.user_service import UserService
 
 logger = logging.getLogger(__name__)
