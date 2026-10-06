@@ -9,13 +9,12 @@ from fastapi.responses import Response
 from jose import JWTError
 from jose import jwt
 
+from api.dependencies import get_auth_service
 from api.dependencies import get_current_user
-from api.dependencies import get_user_service
 from api.schemas.user import UserResponse
 from core.config import settings
 from services.auth_service import AuthService
 from services.auth_service import oauth
-from services.user_service import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,6 @@ async def auth_status(request: Request):
         if auth_header.lower().startswith("bearer "):
             token = auth_header[7:].strip() or None
 
-    # TODO add user?
     if not token:
         return {"authenticated": False}
 
@@ -87,7 +85,7 @@ async def google_login(request: Request):
 @router.get("/google/callback")
 async def google_callback(
     request: Request,
-    user_service: UserService = Depends(get_user_service)
+    auth_service: AuthService = Depends(get_auth_service)
 ):
     logger.info("Received Google OAuth callback")
 
@@ -116,7 +114,6 @@ async def google_callback(
 
     # 4. Create or fetch user and generate app JWT
     try:
-        auth_service = AuthService(user_service)
         access_token = await auth_service.authenticate_or_create_user(userinfo)
     except Exception as e:
         logger.error("Failed to authenticate/create user: %s", e, exc_info=True)

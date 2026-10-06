@@ -42,9 +42,10 @@ class AuthService:
         email = user_info.get('email')
         name = user_info.get('name')
 
-        existing_user = self.user_service.get_user_by_google_id(google_id)
+        existing_user = await self.user_service.get_user_by_google_id(google_id)
+
         if not existing_user:
-            existing_user = self.user_service.get_user_by_email(email)
+            existing_user = await self.user_service.get_user_by_email(email)
 
         if not existing_user:
             user_in = UserCreate(
@@ -52,7 +53,6 @@ class AuthService:
                 google_id=google_id,
                 name=name,
             )
-            existing_user = self.user_service.create_user(user_in)
+            existing_user = await self.user_service.create_user(user_in)
 
-        # Generate JWT with user ID
         return create_access_token(data={"sub": str(existing_user.id)})

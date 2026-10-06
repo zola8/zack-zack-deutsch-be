@@ -8,13 +8,14 @@ from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from jose import jwt
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.schemas.user import UserResponse
 from core.config import settings
-from core.database import get_db
+from core.database import get_async_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
+from services.auth_service import AuthService
 from services.dictionary_service import DictionaryService
 from services.grammar_checker_service import GrammarChecker
 from services.translator.translator_service import TranslatorService
@@ -54,11 +55,11 @@ def get_translator_service() -> TranslatorService:
     return TranslatorService()
 
 
-_grammar_checker = GrammarChecker("de-DE")
+grammar_checker = GrammarChecker("de-DE")
 
 
 def get_grammar_checker() -> GrammarChecker:
-    return _grammar_checker
+    return grammar_checker
 
 
 def get_dictionary_repo() -> DictionaryRepository:
@@ -69,8 +70,12 @@ def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_r
     return DictionaryService(repo)
 
 
-def get_user_service(db: Session = Depends(get_db)) -> UserService:
+def get_user_service(db: AsyncSession = Depends(get_async_db)) -> UserService:
     return UserService(UserRepository(db))
+
+
+def get_auth_service(user_service: UserService = Depends(get_user_service)) -> AuthService:
+    return AuthService(user_service)
 
 
 # ==========================================
@@ -121,8 +126,7 @@ async def get_current_user(
             detail="Invalid token payload",
         )
 
-    # Fetch from DB
-    user = user_service.get_user_by_id(user_id)
+    user = await user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
