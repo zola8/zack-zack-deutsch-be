@@ -20,7 +20,7 @@ router = APIRouter(prefix="/dictionary", tags=["Dictionary"])
 
 
 @router.post("/search", response_model=SearchResponse)
-async def search_dictionary(
+def search_dictionary(
     request: DictionarySearchRequest,
     service: DictionaryService = Depends(get_dictionary_service)
 ):
@@ -36,7 +36,7 @@ async def search_dictionary(
 
 
 @router.get("/exact/{word}", response_model=ExactMatchResponse)
-async def get_exact_match(
+def get_exact_match(
     word: str,
     lang_from: str = Query(default="en"),
     lang_to: str = Query(default="de"),
@@ -54,7 +54,7 @@ async def get_exact_match(
 
 
 @router.post("/contains", response_model=ContainsResponse)
-async def search_contains(
+def search_contains(
     request: DictionaryContainsRequest,
     service: DictionaryService = Depends(get_dictionary_service)
 ):
@@ -79,7 +79,7 @@ async def search_contains(
 
 
 @router.get("/stats", response_model=StatsResponse)
-async def get_stats(
+def get_stats(
     service: DictionaryService = Depends(get_dictionary_service)
 ):
     """Get statistics about the dictionary."""

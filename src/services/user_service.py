@@ -13,25 +13,25 @@ class UserService:
             return None
         return UserResponse.model_validate(db_user)
 
-    def get_user_by_id(self, user_id: int) -> UserResponse | None:
-        db_user = self.repo.get_user_by_id(user_id)
+    async def get_user_by_id(self, user_id: int) -> UserResponse | None:
+        db_user = await self.repo.get_user_by_id(user_id)
         return self._to_response(db_user)
 
-    def get_user_by_email(self, email: str) -> UserResponse | None:
-        db_user = self.repo.get_user_by_email(email)
+    async def get_user_by_email(self, email: str) -> UserResponse | None:
+        db_user = await self.repo.get_user_by_email(email)
         return self._to_response(db_user)
 
-    def get_user_by_google_id(self, google_id: str) -> UserResponse | None:
-        db_user = self.repo.get_user_by_google_id(google_id)
+    async def get_user_by_google_id(self, google_id: str) -> UserResponse | None:
+        db_user = await self.repo.get_user_by_google_id(google_id)
         return self._to_response(db_user)
 
-    def create_user(self, user_in: UserCreate) -> UserResponse:
-        db_user = self.repo.create_user(user_in)
+    async def create_user(self, user_in: UserCreate) -> UserResponse:
+        db_user = await self.repo.create_user(user_in)
         return self._to_response(db_user)
 
-    def update_user(self, user_id: int, update_data: UserUpdate) -> UserResponse | None:
-        db_user = self.repo.update_user(user_id, update_data)
+    async def update_user(self, user_id: int, update_data: UserUpdate) -> UserResponse | None:
+        db_user = await self.repo.update_user(user_id, update_data)
         return self._to_response(db_user)
 
-    def delete_user(self, user_id: int) -> bool:
-        return self.repo.delete_user(user_id)
+    async def delete_user(self, user_id: int) -> bool:
+        return await self.repo.delete_user(user_id)
