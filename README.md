@@ -41,3 +41,5 @@ pip install -r requirements.txt
 #### Databases
 
 - Turso console: https://app.turso.tech/zola8
+
+- Avien Postgres console: https://console.aiven.io/account/a5e0f2593af3/project/zola8/services/zz-deutsch-postgres/overview

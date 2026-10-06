@@ -7,7 +7,7 @@ from jose import jwt
 
 from api.schemas.user import UserCreate
 from core.config import settings
-from persistence.repositories.user_repository import UserRepository
+from services.user_service import UserService
 
 oauth = OAuth()
 
@@ -34,31 +34,25 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository):
-        self.user_repo = user_repo
+    def __init__(self, user_service: UserService):
+        self.user_service = user_service
 
     async def authenticate_or_create_user(self, user_info: dict):
         google_id = user_info.get('sub')
         email = user_info.get('email')
-
         name = user_info.get('name')
-        given_name = user_info.get('given_name')
-        family_name = user_info.get('family_name')
-        picture = user_info.get('picture')
 
-        db_user = self.user_repo.get_user_by_google_id(google_id)
-        if not db_user:
-            db_user = self.user_repo.get_user_by_email(email)
+        existing_user = self.user_service.get_user_by_google_id(google_id)
+        if not existing_user:
+            existing_user = self.user_service.get_user_by_email(email)
 
-        if not db_user:
+        if not existing_user:
             user_in = UserCreate(
                 email=email,
                 google_id=google_id,
                 name=name,
-                given_name=given_name,
-                family_name=family_name,
-                picture=picture
             )
-            db_user = self.user_repo.create_user(user_in)
+            existing_user = self.user_service.create_user(user_in)
 
-        return create_access_token(data={"sub": str(db_user.id)})
+        # Generate JWT with user ID
+        return create_access_token(data={"sub": str(existing_user.id)})

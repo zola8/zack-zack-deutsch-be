@@ -12,3 +12,5 @@ itsdangerous>=2.2.0
 python-json-logger>=4.1.0
 deepl>=1.32.0
 turso_serverless>=0.1.0
+sqlalchemy>=2.0.53
+psycopg2-binary>=2.9.13

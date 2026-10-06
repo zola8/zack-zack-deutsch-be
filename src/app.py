@@ -31,6 +31,9 @@ from api.routers import dictionary
 from core.config import print_settings
 from core.config import settings
 from core.logging_config import configure_logging
+from core.database import Base
+from core.database import engine
+from persistence.models.dbuser import DBUser  # noqa: F401
 from services.auth.auth_service import configure_oauth
 from api.dependencies import _grammar_checker
 
@@ -76,6 +79,12 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(dictionary.router, prefix=settings.API_V1_STR)
 
 
+def initialize_database() -> None:
+    """Create all database tables."""
+    logger.info("Syncing database tables with PostgreSQL...")
+    Base.metadata.create_all(bind=engine)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup complete.")
@@ -92,6 +101,7 @@ def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
+    initialize_database()
     configure_middleware(app)
     configure_oauth()
     register_routers(app)

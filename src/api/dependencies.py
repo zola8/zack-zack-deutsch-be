@@ -8,14 +8,17 @@ from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from jose import jwt
+from sqlalchemy.orm import Session
 
 from api.schemas.user import UserResponse
 from core.config import settings
+from core.database import get_db
 from persistence.repositories.dictionary_repository import DictionaryRepository
 from persistence.repositories.user_repository import UserRepository
 from services.dictionary.dictionary_service import DictionaryService
 from services.grammar_checker.grammar_checker import GrammarChecker
 from services.translator.translator_service import TranslatorService
+from services.user_service import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +35,6 @@ _turso_dictionary_client = turso_serverless.connect(
     settings.TURSO_DICTIONARY_URL,
     auth_token=settings.TURSO_DICTIONARY_API_KEY,
 )
-_turso_globaldb_client = turso_serverless.connect(
-    settings.TURSO_GLOBAL_DB_URL,
-    auth_token=settings.TURSO_GLOBAL_DB_API_KEY,
-)
 
 
 def close_turso_connections():
@@ -43,7 +42,6 @@ def close_turso_connections():
     logger.info("Closing Turso database connections...")
     try:
         _turso_dictionary_client.close()
-        _turso_globaldb_client.close()
         logger.info("Turso connections closed successfully.")
     except Exception as e:
         logger.error("Error closing Turso connections: %s", e)
@@ -71,8 +69,8 @@ def get_dictionary_service(repo: DictionaryRepository = Depends(get_dictionary_r
     return DictionaryService(repo)
 
 
-def get_user_repo() -> UserRepository:
-    return UserRepository(_turso_globaldb_client)
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    return UserService(UserRepository(db))
 
 
 # ==========================================
@@ -80,7 +78,7 @@ def get_user_repo() -> UserRepository:
 # ==========================================
 async def get_current_user(
     request: Request,
-    user_repo: UserRepository = Depends(get_user_repo),
+    user_service: UserService = Depends(get_user_service),
     token_from_header: str | None = Depends(oauth2_scheme),
 ) -> UserResponse:
     # 1. Try to get token from the Authorization header first
@@ -124,12 +122,11 @@ async def get_current_user(
         )
 
     # Fetch from DB
-    user = user_repo.get_user_by_id(user_id)
+    user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
 
-    # Convert DB entity to Pydantic schema
-    return UserResponse.model_validate(user)
+    return user

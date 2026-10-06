@@ -26,11 +26,9 @@ class Settings(BaseSettings):
     PORT: int = 8080
 
     # Database
-    # DATABASE_URL: str = "sqlite:///./zz-deutsch.db"
     TURSO_DICTIONARY_URL: str = "libsql://dictionary-zola8.aws-eu-west-1.turso.io"
     TURSO_DICTIONARY_API_KEY: str = ""
-    TURSO_GLOBAL_DB_URL: str = "libsql://zz-deutsch-zola8.aws-eu-west-1.turso.io"
-    TURSO_GLOBAL_DB_API_KEY: str = ""
+    POSTGRES_GLOBAL_DB_URL: str = ""
 
     # Security
     AUTH_SECRET_KEY: str = "super-secret-key-change-in-production"

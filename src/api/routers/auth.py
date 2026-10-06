@@ -10,13 +10,12 @@ from jose import JWTError
 from jose import jwt
 
 from api.dependencies import get_current_user
-from api.dependencies import get_user_repo
+from api.dependencies import get_user_service
 from api.schemas.user import UserResponse
 from core.config import settings
-from persistence.models.user import User
-from persistence.repositories.user_repository import UserRepository
 from services.auth.auth_service import AuthService
 from services.auth.auth_service import oauth
+from services.user_service import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +87,7 @@ async def google_login(request: Request):
 @router.get("/google/callback")
 async def google_callback(
     request: Request,
-    user_repo: UserRepository = Depends(get_user_repo)
+    user_service: UserService = Depends(get_user_service)
 ):
     logger.info("Received Google OAuth callback")
 
@@ -117,7 +116,7 @@ async def google_callback(
 
     # 4. Create or fetch user and generate app JWT
     try:
-        auth_service = AuthService(user_repo)
+        auth_service = AuthService(user_service)
         access_token = await auth_service.authenticate_or_create_user(userinfo)
     except Exception as e:
         logger.error("Failed to authenticate/create user: %s", e, exc_info=True)
@@ -141,7 +140,7 @@ async def logout(response: Response):
 
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: User = Depends(get_current_user)):
+async def read_users_me(current_user: UserResponse = Depends(get_current_user)):
     """Returns current user profile using the UserResponse schema."""
     logger.debug("Fetching profile for user ID: %s", current_user.id)
     return current_user
